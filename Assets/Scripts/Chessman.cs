@@ -10,6 +10,34 @@ public abstract class Chessman : MonoBehaviour
 
     public bool isWhite;
 
+    public string characterName = "Pawn";
+
+    public int characterID;
+
+    public List<int> friendList;
+
+    public string characterModifier = "";
+
+    private void Start()
+    {
+        int IDOffset = 0;
+        if (!isWhite)
+        {
+            IDOffset = 16;
+        }
+
+        var rng = new System.Random();
+        for (int i = 0; i < 16; i++)
+        {
+            //There is a 70% chance each character is friends with another character in the same army.
+            var friendCheck = rng.Next(0, 100) < 70;
+            if (friendCheck)
+            {
+                friendList.Add(IDOffset+i);
+            }
+        }
+    }
+
     public void SetPosition(int x, int y)
     {
         CurrentX = x;
@@ -19,6 +47,18 @@ public abstract class Chessman : MonoBehaviour
     public virtual bool[,] PossibleMoves()
     {
         return new bool[8, 8];
+    }
+
+    public void ApplyDeathReaction(int deathID,string deathName)
+    {
+        foreach(int friend in friendList)
+        {
+            if (deathID == friend)
+            {
+                //If a character's friend has died, their modifier is updated to take this into account.
+                characterModifier = "The "+ characterName+ " was enraged by the death of their friend, the " + deathName+". ";
+            }
+        }
     }
 
     public bool Move(int x, int y, ref bool[,] r)
